@@ -57,6 +57,7 @@ type config struct {
 	noHeaders bool
 
 	requester requester
+	proxy     string
 }
 
 func processArgs() config {
@@ -115,6 +116,10 @@ func processArgs() config {
 	flag.BoolVar(&verbose, "verbose", false, "")
 	flag.BoolVar(&verbose, "v", false, "")
 
+	// method param
+	proxy := ""
+	flag.StringVar(&proxy, "proxy", "", "")
+
 	flag.Parse()
 
 	// paths might be in a file, or it might be a single value
@@ -156,6 +161,7 @@ func processArgs() config {
 		hosts:          hosts,
 		output:         output,
 		noHeaders:      noHeaders,
+		proxy:          proxy,
 	}
 }
 
@@ -177,6 +183,7 @@ func init() {
 		h += "  -t, --timeout <millis>     Set the HTTP timeout (default: 10000)\n"
 		h += "  -v, --verbose              Verbose mode\n"
 		h += "  -X, --method <method>      HTTP method (default: GET)\n\n"
+		h += "  --proxy http://127.0.0.1:8080      HTTP Proxy\n\n"
 
 		h += "Defaults:\n"
 		h += "  pathsFile: ./paths\n"

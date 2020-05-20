@@ -7,25 +7,41 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
+
+	"github.com/corpix/uarand"
 )
 
-var transport = &http.Transport{
-	TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
-	DisableKeepAlives: true,
-	DialContext: (&net.Dialer{
-		Timeout:   30 * time.Second,
-		KeepAlive: time.Second,
-		DualStack: true,
-	}).DialContext,
-}
-
-var httpClient = &http.Client{
-	Transport: transport,
-}
+var httpClient *http.Client = nil
 
 func goRequest(r request) response {
+
+	if httpClient == nil {
+
+		proxyURL := http.ProxyFromEnvironment
+
+		if len(r.proxy) > 0 {
+			pu, err := url.Parse(r.proxy)
+			if err == nil {
+				proxyURL = http.ProxyURL(pu)
+			}
+		}
+		var transport = &http.Transport{
+			Proxy:             proxyURL,
+			TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
+			DisableKeepAlives: true,
+			DialContext: (&net.Dialer{
+				Timeout:   30 * time.Second,
+				KeepAlive: time.Second,
+				DualStack: true,
+			}).DialContext,
+		}
+		httpClient = &http.Client{
+			Transport: transport,
+		}
+	}
 	httpClient.Timeout = r.timeout
 
 	if !r.followLocation {
@@ -64,6 +80,8 @@ func goRequest(r request) response {
 
 		req.Header.Set(parts[0], parts[1])
 	}
+
+	req.Header.Set("User-Agent", uarand.GetRandom())
 
 	resp, err := httpClient.Do(req)
 	if resp != nil {

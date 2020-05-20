@@ -134,6 +134,7 @@ func main() {
 				followLocation: c.followLocation,
 				body:           c.body,
 				timeout:        time.Duration(c.timeout * 1000000),
+				proxy:          c.proxy,
 			}
 		}
 	}

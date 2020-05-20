@@ -16,6 +16,7 @@ type request struct {
 
 	followLocation bool
 	timeout        time.Duration
+	proxy          string
 }
 
 // Hostname returns the hostname part of the request
